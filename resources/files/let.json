@@ -1,0 +1,95 @@
+{
+    "name": "print.rinha",
+    "expression": {
+        "kind": "Let",
+        "name": {
+            "text": "sum",
+            "location": {
+                "start": 4,
+                "end": 7,
+                "filename": "print.rinha"
+            }
+        },
+        "value": {
+            "kind": "Function",
+            "parameters": [
+                {
+                    "text": "n",
+                    "location": {
+                        "start": 14,
+                        "end": 15,
+                        "filename": "print.rinha"
+                    }
+                }
+            ],
+            "value": {
+                "kind": "Print",
+                "value": {
+                    "kind": "Var",
+                    "text": "n",
+                    "location": {
+                        "start": 31,
+                        "end": 32,
+                        "filename": "print.rinha"
+                    }
+                },
+                "location": {
+                    "start": 24,
+                    "end": 33,
+                    "filename": "print.rinha"
+                }
+            },
+            "location": {
+                "start": 10,
+                "end": 35,
+                "filename": "print.rinha"
+            }
+        },
+        "next": {
+            "kind": "Print",
+            "value": {
+                "kind": "Call",
+                "callee": {
+                    "kind": "Var",
+                    "text": "sum",
+                    "location": {
+                        "start": 45,
+                        "end": 48,
+                        "filename": "print.rinha"
+                    }
+                },
+                "arguments": [
+                    {
+                        "kind": "Int",
+                        "value": 5,
+                        "location": {
+                            "start": 49,
+                            "end": 50,
+                            "filename": "print.rinha"
+                        }
+                    }
+                ],
+                "location": {
+                    "start": 45,
+                    "end": 51,
+                    "filename": "print.rinha"
+                }
+            },
+            "location": {
+                "start": 38,
+                "end": 52,
+                "filename": "print.rinha"
+            }
+        },
+        "location": {
+            "start": 0,
+            "end": 52,
+            "filename": "print.rinha"
+        }
+    },
+    "location": {
+        "start": 0,
+        "end": 52,
+        "filename": "print.rinha"
+    }
+}
