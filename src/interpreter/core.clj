@@ -3,7 +3,9 @@
   (:require [clojure.java.io :as io])
   (:gen-class))
 
-(declare read-file parser)
+(declare read-file parser get-operation print-and-return)
+
+(defmacro functionize [macro] `(fn [& args#] (eval (cons '~macro args#))))
 
 (defn -main
   [& args]
@@ -15,41 +17,38 @@
 (defn parser
   ([ast] (parser ast {}))
   ([ast env]
-   (cond
-     (= (ast :kind) "Str") (ast :value)
-     (= (ast :kind) "Int") (ast :value)
-     (= (ast :kind) "Bool") (ast :value)
-     (= (ast :kind) "Var") (env (keyword (ast :text)))
-     (= (ast :kind) "Let") (let [new-env (assoc env (keyword ((ast :name) :text)) (parser (ast :value) env))]
-                             (parser (ast :next) new-env))
-     (= (ast :kind) "If") (if (parser (ast :condition) env) (parser (ast :then) env) (parser (ast :otherwise) env))
-     (= (ast :kind) "Function") (let [params (map (fn [param] (keyword (param :text))) (ast :parameters))]
-                                  (fn [env] (parser (ast :value) (dissoc (conj env (zipmap params (env :arguments))) :arguments))))
-     (= (ast :kind) "Call") (let [new-env (assoc env :arguments (map (fn [arg] (parser arg env)) (ast :arguments)))]
-                              ((parser (ast :callee) new-env) new-env))
-     (= (ast :kind) "Tuple") (list (parser (ast :first) env) (parser (ast :second) env))
-     (= (ast :kind) "First") (parser ((ast :value) :first) env)
-     (= (ast :kind) "Second") (parser ((ast :value) :second) env)
-     (= (ast :kind) "Print") (let [result (parser (ast :value) env)]
-                               (if (list? result) (println (str "(" (first result) ", " (second result) ")"))
-                                                  (println result)) result)
-     (= (ast :kind) "Binary")
-        (cond
-            (= (ast :op) "Add") (+    (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Sub") (-    (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Mul") (*    (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Div") (/    (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Rem") (mod  (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Eq")  (=    (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Neq") (not= (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Lt")  (<    (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Gt")  (>    (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Lte") (<=   (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Gte") (>=   (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "And") (and  (parser (ast :lhs) env) (parser (ast :rhs) env))
-            (= (ast :op) "Or")  (or   (parser (ast :lhs) env) (parser (ast :rhs) env)))
+   (case (ast :kind)
+     ("Str" "Int" "Bool")  (ast :value)
+     "Var" (env (keyword (ast :text)))
+     "Let" (let [new-env (assoc env (keyword ((ast :name) :text)) (parser (ast :value) env))]
+             (parser (ast :next) new-env))
+     "If" (if (parser (ast :condition) env)
+            (parser (ast :then) env)
+            (parser (ast :otherwise) env))
+     "Function" (let [params (map #(keyword (% :text)) (ast :parameters))]
+                  (fn [env] (parser (ast :value) (dissoc (conj env (zipmap params (env :arguments))) :arguments))))
+     "Call" (let [new-env (assoc env :arguments (map #(parser % env) (ast :arguments)))]
+              ((parser (ast :callee) new-env) new-env))
+     "Tuple" (list (parser (ast :first) env) (parser (ast :second) env))
+     "First" (parser ((ast :value) :first) env)
+     "Second" (parser ((ast :value) :second) env)
+     "Print" (print-and-return (parser (ast :value) env))
+     "Binary" ((get-operation ast) (parser (ast :lhs) env) (parser (ast :rhs) env))
      )
    )
+  )
 
-
+(defn get-operation [ast]
+  (partial
+    (case (ast :op)
+      "Add" + "Sub" - "Mul" * "Div" / "Rem" mod "Eq" = "Neq" not=
+      "Lt" < "Gt" > "Lte" <= "Gte" >= "And" (functionize and) "Or" (functionize or)
+      )
+    )
+  )
+(defn print-and-return [value]
+  (if (list? value)
+    (println (str "(" (first value) ", " (second value) ")"))
+    (println value))
+  value
   )
