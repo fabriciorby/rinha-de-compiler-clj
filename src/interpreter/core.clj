@@ -11,8 +11,8 @@
   [& args]
   (parser ((read-file (first args)) :expression)))
 
-(defn read-file [filename]
-  (json/read (io/reader (io/resource (str "files/" filename ".json"))) :key-fn keyword))
+(defn read-file [filepath]
+  (json/read (io/reader filepath) :key-fn keyword))
 
 (defn parser
   ([ast] (parser ast {}))

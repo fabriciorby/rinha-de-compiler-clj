@@ -7,11 +7,15 @@ Todos os arquivos de teste devem estar na pasta resources, para gerar mais, é n
 
 ### Leiningen
 ```
-lein run nome_do_arquivo
+lein run path_do_arquivo
+lein run resources/files/combination.json
+lein run /var/rinha/source.rinha.json
 ```
 
 ### Docker
 ```
 docker build -t rinha-clj .
-docker run -e file=nome_do_arquivo rinha-clj
+docker run -e filepath=path_do_arquivo rinha-clj
+docker run -v /var/rinha/source.rinha.json:/var/rinha/source.rinha.json rinha-clj
+docker run -e filepath=resources/files/combination.json rinha-clj
 ```
