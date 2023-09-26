@@ -7,6 +7,11 @@
     (is (= 15 (-main "resources/files/sum.json"))))
   )
 
+(deftest sum-string-test
+  (testing "sum-string.json"
+    (is (= "52" (-main "resources/files/sum-string.json"))))
+  )
+
 (deftest fib-test
   (testing "fib.json"
     (is (= 55 (-main "resources/files/fib.json"))))
@@ -35,4 +40,9 @@
 (deftest print-test
   (testing "print.json"
     (is (= "Hello World" (-main "resources/files/print.json"))))
+  )
+
+(deftest print-fn-test
+  (testing "print-fn.json"
+    (is (fn? (-main "resources/files/print-fn.json"))))
   )

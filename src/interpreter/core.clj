@@ -1,6 +1,7 @@
 (ns interpreter.core
   (:require [clojure.data.json :as json])
   (:require [clojure.java.io :as io])
+  (:require [clojure.math :as math])
   (:gen-class))
 
 (declare read-file parser get-operation print-and-return)
@@ -41,14 +42,15 @@
 (defn get-operation [ast]
   (partial
     (case (ast :op)
-      "Add" + "Sub" - "Mul" * "Div" / "Rem" mod "Eq" = "Neq" not=
-      "Lt" < "Gt" > "Lte" <= "Gte" >= "And" (functionize and) "Or" (functionize or)
-      )
-    )
+      "Add" #(if (and (number? %1) (number? %2)) (+ %1 %2) (str %1 %2))
+      "Sub" - "Mul" * "Div" math/floor-div "Rem" mod "Eq" = "Neq" not=
+      "Lt" < "Gt" > "Lte" <= "Gte" >= "And" (functionize and) "Or" (functionize or)))
   )
+
 (defn print-and-return [value]
-  (if (list? value)
-    (println (str "(" (first value) ", " (second value) ")"))
-    (println value))
+  (cond
+    (list? value) (println (str "(" (first value) ", " (second value) ")"))
+    (or (fn? value) (coll? value)) (println "<#closure>")
+    :else (println value))
   value
   )
